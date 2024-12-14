@@ -12,7 +12,7 @@ import (
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
 
-	r := router.New()
+	r := router.New(nil)
 	wrappedRouter := logger.AddLoggerMiddleware(log, logger.LoggerMiddleware(r))
 
 	log.Info("server is up :8080")

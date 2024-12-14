@@ -7,10 +7,10 @@ import (
 )
 
 // NEW CREATES A NEW ROUTER WITH ALL THE HANDLERS CONFIGURED!
-func New() *http.ServeMux {
+func New(ns handler.NewsStorer) *http.ServeMux {
 	r := http.NewServeMux()
 
-	r.HandleFunc("POST /news", handler.PostNews())
+	r.HandleFunc("POST /news", handler.PostNews(ns))
 	r.HandleFunc("GET /news", handler.GetNews())
 
 	r.HandleFunc("GET /news/{id}", handler.GetNewsById())
