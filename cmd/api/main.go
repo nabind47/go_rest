@@ -5,15 +5,19 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/nabind47/go_rest47/internal/logger"
 	"github.com/nabind47/go_rest47/internal/router"
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
-	logger.Info("server is up :8080")
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
 
 	r := router.New()
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		logger.Error("failed to start server", "error", err)
+	wrappedRouter := logger.AddLoggerMiddleware(log, logger.LoggerMiddleware(r))
+
+	log.Info("server is up :8080")
+
+	if err := http.ListenAndServe(":8080", wrappedRouter); err != nil {
+		log.Error("failed to start server", "error", err)
 	}
 }
