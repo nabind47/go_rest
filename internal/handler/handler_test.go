@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nabind47/go_rest47/internal/handler"
+	"github.com/nabind47/go_rest47/internal/store"
 )
 
 func Test_PostNews(t *testing.T) {
@@ -276,25 +277,25 @@ type mockNewsStorer struct {
 	err bool
 }
 
-func (m mockNewsStorer) Create(_ handler.NewsPostRequestBody) (news handler.NewsPostRequestBody, err error) {
+func (m mockNewsStorer) Create(_ store.News) (news store.News, err error) {
 	if m.err {
 		return news, errors.New("some error")
 	}
 	return news, nil
 }
-func (m mockNewsStorer) FindByID(_ uuid.UUID) (news handler.NewsPostRequestBody, err error) {
+func (m mockNewsStorer) FindByID(_ uuid.UUID) (news store.News, err error) {
 	if m.err {
 		return news, errors.New("some error")
 	}
 	return news, nil
 }
-func (m mockNewsStorer) FindAll() (news []handler.NewsPostRequestBody, err error) {
+func (m mockNewsStorer) FindAll() (news []store.News, err error) {
 	if m.err {
 		return news, errors.New("some error")
 	}
 	return news, nil
 }
-func (m mockNewsStorer) UpdateByID(_ handler.NewsPostRequestBody) error {
+func (m mockNewsStorer) UpdateByID(_ store.News) error {
 	if m.err {
 		return errors.New("some error")
 	}

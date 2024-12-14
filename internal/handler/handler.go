@@ -6,14 +6,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nabind47/go_rest47/internal/logger"
+	"github.com/nabind47/go_rest47/internal/store"
 )
 
 type NewsStorer interface {
-	Create(NewsPostRequestBody) (NewsPostRequestBody, error)
-	FindAll() ([]NewsPostRequestBody, error)
-	FindByID(uuid.UUID) (NewsPostRequestBody, error)
+	Create(store.News) (store.News, error)
+	FindAll() ([]store.News, error)
+	FindByID(uuid.UUID) (store.News, error)
 
-	UpdateByID(NewsPostRequestBody) error
+	UpdateByID(store.News) error
 	DeleteByID(uuid.UUID) error
 }
 
@@ -28,14 +29,15 @@ func PostNews(ns NewsStorer) http.HandlerFunc {
 			return
 		}
 
-		if err := body.Validate(); err != nil {
+		n, err := body.Validate()
+		if err != nil {
 			logger.Error("invalid payload", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}
 
-		if _, err := ns.Create(body); err != nil {
+		if _, err := ns.Create(n); err != nil {
 			logger.Error("failed to create news", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
@@ -106,14 +108,15 @@ func UpdateNewsById(ns NewsStorer) http.HandlerFunc {
 			return
 		}
 
-		if err := body.Validate(); err != nil {
+		n, err := body.Validate()
+		if err != nil {
 			logger.Error("invalid payload", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}
 
-		if err := ns.UpdateByID(body); err != nil {
+		if err := ns.UpdateByID(n); err != nil {
 			logger.Error("failed to update news", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
