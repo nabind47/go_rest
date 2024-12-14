@@ -11,10 +11,10 @@ func New(ns handler.NewsStorer) *http.ServeMux {
 	r := http.NewServeMux()
 
 	r.HandleFunc("POST /news", handler.PostNews(ns))
-	r.HandleFunc("GET /news", handler.GetNews())
+	r.HandleFunc("GET /news", handler.GetNews(ns))
 
-	r.HandleFunc("GET /news/{id}", handler.GetNewsById())
-	r.HandleFunc("PUT /news/{id}", handler.UpdateNewsById())
-	r.HandleFunc("DELETE /news/{id}", handler.DeleteNewsById())
+	r.HandleFunc("GET /news/{id}", handler.GetNewsById(ns))
+	r.HandleFunc("PUT /news/{id}", handler.UpdateNewsById(ns))
+	r.HandleFunc("DELETE /news/{id}", handler.DeleteNewsById(ns))
 	return r
 }
