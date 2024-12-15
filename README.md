@@ -2,14 +2,18 @@
 go test ./...
 ```
 
-> [!TIP] Tour of Go  
+> [!TIP] 
 > [Tour of Go](https://go.dev/tour/welcome/1)
 
-> [!TIP] Manual  
+> [!TIP]  
 > [Manual](https://go.dev/doc/)
 
-> [!TIP] Go by Example  
+> [!TIP]   
 > [Examples](https://gobyexample.com/)
 
-> [!TIP] Effective Go   
+> [!TIP]
 > [Effective Go](https://go.dev/doc/effective_go)
+
+> [!NOTE]
+> [Style Guide](https://google.github.io/styleguide/go/)
+
