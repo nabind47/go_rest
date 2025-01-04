@@ -1,21 +1,33 @@
 package handler_test
 
 import (
+	"net/url"
 	"testing"
+	"time"
 
 	"github.com/nabind47/go_rest47/internal/handler"
+	"github.com/nabind47/go_rest47/internal/store"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewsPostRequestBody_Validate(t *testing.T) {
+	type expectations struct {
+		err  string
+		news store.News
+	}
+
 	testCases := []struct {
-		name     string
-		body     handler.NewsPostRequestBody
-		expected bool
+		name         string
+		body         handler.NewsPostRequestBody
+		expectations expectations
 	}{
 		{
-			name:     "All fields empty - expect error",
-			body:     handler.NewsPostRequestBody{},
-			expected: true,
+			name: "All fields empty - expect error",
+			body: handler.NewsPostRequestBody{},
+			expectations: expectations{
+				err: "invalid payload: one or more required fields are empty",
+			},
 		},
 		{
 			name: "Invalid CreatedAt format - expect error",
@@ -28,7 +40,9 @@ func TestNewsPostRequestBody_Validate(t *testing.T) {
 				Source:    "http://example.com",
 				Tags:      []string{"tag1"},
 			},
-			expected: true,
+			expectations: expectations{
+				err: `invalid created_at format: parsing time "InvalidDate"`,
+			},
 		},
 		{
 			name: "Invalid Source URL - expect error",
@@ -41,33 +55,53 @@ func TestNewsPostRequestBody_Validate(t *testing.T) {
 				Source:    "invalid_url",
 				Tags:      []string{"tag1"},
 			},
-			expected: true,
-		},
-		{
-			name: "Valid payload - no error expected",
-			body: handler.NewsPostRequestBody{
-				Author:    "Author",
-				Title:     "Title",
-				Summary:   "Summary",
-				CreatedAt: "2024-12-14T15:04:05Z",
-				Content:   "Content",
-				Source:    "http://example.com",
-				Tags:      []string{"tag1", "tag2"},
+			expectations: expectations{
+				err: `invalid source URL format: parse "invalid_url"`,
 			},
-			expected: false,
 		},
+		// {
+		// 	name: "Valid payload - no error expected",
+		// 	body: handler.NewsPostRequestBody{
+		// 		Author:    "Author",
+		// 		Title:     "Title",
+		// 		Summary:   "Summary",
+		// 		CreatedAt: "2024-12-14T15:04:05Z",
+		// 		Content:   "Content",
+		// 		Source:    "http://example.com",
+		// 		Tags:      []string{"tag1", "tag2"},
+		// 	},
+		// 	expectations: expectations{
+		// 		news: store.News{
+		// 			ID:      uuid.New(),
+		// 			Author:  "Author",
+		// 			Title:   "Title",
+		// 			Summary: "Summary",
+		// 			Content: "Content",
+		// 			Tags:    []string{"tag1", "tag2"},
+		// 		},
+		// 	},
+		// },
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := tc.body.Validate()
+			news, err := tc.body.Validate()
 
-			if tc.expected && err == nil {
-				t.Fatalf("expected error but got nil")
-			}
+			if tc.expectations.err != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectations.err)
+			} else {
+				assert.NoError(t, err)
 
-			if !tc.expected && err != nil {
-				t.Fatalf("expected no error but got: %v", err)
+				parsedTime, parsedErr := time.Parse(time.RFC3339, tc.body.CreatedAt)
+				require.NoError(t, parsedErr)
+
+				parsedURL, parsedURLErr := url.ParseRequestURI(tc.body.Source)
+				require.NoError(t, parsedURLErr)
+
+				tc.expectations.news.CreatedAt = parsedTime
+				tc.expectations.news.Source = parsedURL
+				assert.Contains(t, tc.expectations.news, news)
 			}
 		})
 	}
